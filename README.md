@@ -72,9 +72,11 @@ curl -XPOST -d 'url=<ngrok_endpoint>/webhook' 'https://api.telegram.org/bot<TOKE
 3. ngrok
 4. https://github.com/kimrgrey/go-telegram
 5. https://gorm.io
+6. https://medium.com/rate-engineering/go-test-your-code-an-introduction-to-effective-testing-in-go-6e4f66f2c259
 
 ## TODO
 - DB Client
+- Authorization
 - Routes, DB Client, Telegram Client tests
 - Test Automation
 - Dockerfile
