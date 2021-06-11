@@ -9,8 +9,6 @@ import (
 )
 
 func HandleMessage(w http.ResponseWriter, r *http.Request) {
-	log.Printf("HandleMessage, %s, %s", r.Method, r.URL.Path)
-
 	// Parse
 	var update, err = parseTelegramRequest(r)
 	if err != nil {

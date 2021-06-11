@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/profclems/go-dotenv"
-	"scada-lts.org/telegramsvc/handler"
+	"scada-lts.org/telegramsvc/routes"
 )
 
 func main() {
@@ -16,22 +16,8 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Endpoints
-	router := http.NewServeMux()
-	router.HandleFunc("/webhook", handler.HandleMessage)
-
-	// Static content
-	fs := http.FileServer(http.Dir("./static"))
-	router.Handle("/", fs)
-
-	server := http.Server{
-		Addr:         ":8088",
-		WriteTimeout: 60 * time.Second,
-		ReadTimeout:  60 * time.Second,
-	}
-
-	err := server.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
+	servingErr := http.ListenAndServe(fmt.Sprintf(":%s", dotenv.GetString("PORT")), routes.GetRoutes())
+	if servingErr != nil {
+		log.Fatal("Failed to init Server: %w", servingErr.Error())
 	}
 }
