@@ -1,3 +1,6 @@
+/*
+Package webhook implements a simple HTTP Request Handler for Telegram webhooks.
+*/
 package webhook
 
 import (
@@ -8,6 +11,8 @@ import (
 	"scada-lts.org/telegramsvc/client"
 )
 
+// HandleMessage receives a Telegram webhook request,
+// and responds through Telegram's API (see Package client)
 func HandleMessage(w http.ResponseWriter, r *http.Request) {
 	// Parse
 	var update, err = parseTelegramRequest(r)
@@ -23,6 +28,8 @@ func HandleMessage(w http.ResponseWriter, r *http.Request) {
 	client.TelegramClient.SendMessage(update.Message.Chat.Id, "Some data")
 }
 
+// parseTelegramRequest deserializes the JSON received in the request body
+// from Telegram webhook request
 func parseTelegramRequest(r *http.Request) (*client.Update, error) {
 	var update client.Update
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {

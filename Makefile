@@ -3,7 +3,7 @@
 services:
 	docker-compose --env-file .env up -d
 
-build:
+build: clean
 	go build main.go
 
 run: services
@@ -16,3 +16,6 @@ prep:
 
 clean:
 	rm -f main
+
+docs:
+	go doc --all 

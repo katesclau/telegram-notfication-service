@@ -4,5 +4,6 @@ import "gorm.io/gorm"
 
 type Topic struct {
 	gorm.Model
-	Name string `gorm:"not null"`
+	Subscribers *Subscriber
+	Name        string `gorm:"not null"`
 }
