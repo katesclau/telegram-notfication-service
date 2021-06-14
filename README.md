@@ -1,8 +1,9 @@
-# Telegram Bot Service
+# Telegram Bot Notification Service
 
 This service aims to bridge any issuer to telegram channels by the means of a separate service with an API and a telegram bot implementation.
 
 This service was initially invisioned to work as a notification service for ScadaLTS[github.com/katesclau]
+[Architecture](/assets/Telegram_Notifier.png)
 
 ## Getting started
 <!-- TODO: improve  -->
@@ -36,7 +37,7 @@ Main goal of this bot handler is to enable users to subscribe to topics configur
 - mute - Disable notifcations for subscribed topics
 - unmute - Enable notifications for subscribed topics
 - subscribe - Subscribe chat to a named topic
-- list - List topics available in this bot
+- topics - List topics available in this bot
 
 This service uses a similar implementation to [2].
 
