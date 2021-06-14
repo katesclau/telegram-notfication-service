@@ -3,7 +3,8 @@
 This service aims to bridge any issuer to telegram channels by the means of a separate service with an API and a telegram bot implementation.
 
 This service was initially invisioned to work as a notification service for ScadaLTS[github.com/katesclau]
-[Architecture](/assets/Telegram_Notifier.png)
+
+![Architecture](/assets/Telegram_Notifier.png)
 
 ## Getting started
 <!-- TODO: improve  -->
