@@ -10,6 +10,6 @@ type Subscriber struct {
 	UpdatedAt time.Time
 	Channel   string `gorm:"not null"`
 	Enabled   bool   `gorm:"default:true"`
-	Topic     Topic
+	Topic     Topic  `gorm:"constraint:OnDelete:CASCADE;"`
 	TopicID   uint
 }
