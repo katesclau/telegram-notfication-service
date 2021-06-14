@@ -56,4 +56,27 @@ func TestTopics(t *testing.T) {
 		assert.Equal(t, 200, response.Code, "OK response is expected")
 	})
 
+	// Test Get a Topic
+	t.Run("Get Created Topic", func(t *testing.T) {
+		request, _ := http.NewRequest("GET", "/topic", nil)
+		response := httptest.NewRecorder()
+		router := GetRoutes()
+		router.ServeHTTP(response, request)
+		assert.Equal(t, 200, response.Code, "OK response is expected")
+	})
+
+	// Test Subscribers
+	t.Run("Get Topic Subscribers", func(t *testing.T) {
+		// Add a subscriber through DB
+
+		// Get through endpoint
+
+		// Assert subscriber info
+		request, _ := http.NewRequest("GET", "/topic", nil)
+		response := httptest.NewRecorder()
+		router := GetRoutes()
+		router.ServeHTTP(response, request)
+		assert.Equal(t, 200, response.Code, "OK response is expected")
+	})
+
 }
