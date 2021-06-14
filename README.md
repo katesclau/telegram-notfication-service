@@ -16,10 +16,20 @@ TELEGRAM_BOT_NAME=bot_name
 ```
 git clone https://github.com/katesclau/telegram-notfication-service
 cd telegram-notfication-service
-make & ngrok http 8088
+make
 ```
-Access 
-## Commands
+
+In another terminal, start ngrok
+```
+ngrok http 8088
+```
+
+Issue the endpoint to Telegram API to attach your webhook to the bot's configuration
+```
+curl -XPOST -d 'url=<ngrok_https_endpoint>/webhook' 'https://api.telegram.org/bot<TELEGRAM_TOKEN>/SetWebhook'
+```
+
+## Bot Commands
 
 Main goal of this bot handler is to enable users to subscribe to topics configured here.
 
@@ -31,7 +41,9 @@ Main goal of this bot handler is to enable users to subscribe to topics configur
 This service uses a similar implementation to [2].
 
 ## API
-<!-- TODO: improve  -->
+The REST API implements
+- Topic
+- Subscribers 
 
 ### /topic
 Allows 
@@ -46,25 +58,14 @@ Allows
 - POST: push event to subscribers
 
 ### /topic/<topic_name>/subscribers
-- GET: retrieve subscribers information
+- GET: retrieve subscribers information, for a given topic
 
 ## API Authentication
 Consists in a single Bearer token, defined in the .env file. Please provide it in each request as such...
-<!-- TODO: improve  -->
-```
-curl...
-```
-
-
-## Setting up Bot
-<!-- TODO  -->
-## Testing locally
-Local testing can be done by using ngrok to tunnel the local service to a valid https endpoint and pushing the created endpoint to Telegram's webhook configuration.
 
 ```
-curl -XPOST -d 'url=<ngrok_endpoint>/webhook' 'https://api.telegram.org/bot<TOKEN>/SetWebhook'
+curl -XGET -H 'Authorization: Bearer <API_TOKEN defined in .env>' -H "Content-type: application/json" 'http://localhost:8088/topic/some_topic/subscribers'
 ```
-<!-- TODO: improve  -->
 
 ## References
 1. https://medium.com/swlh/build-a-telegram-bot-in-go-in-9-minutes-e06ad38acef1
@@ -73,6 +74,7 @@ curl -XPOST -d 'url=<ngrok_endpoint>/webhook' 'https://api.telegram.org/bot<TOKE
 4. https://github.com/kimrgrey/go-telegram
 5. https://gorm.io
 6. https://medium.com/rate-engineering/go-test-your-code-an-introduction-to-effective-testing-in-go-6e4f66f2c259
+7. https://github.com/stretchr/testify
 
 ## TODO
 - Routes

@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"strings"
 
 	"gorm.io/driver/mysql"
@@ -24,7 +23,6 @@ func buildMysqlDSUrl(url string, database string, username string, password stri
 
 func NewMYSQLDB(url string, database string, username string, password string) (*gorm.DB, error) {
 	dsn := buildMysqlDSUrl(url, database, username, password)
-	fmt.Printf("DSN: %s \n", dsn)
 	return gorm.Open(mysql.New(mysql.Config{
 		DSN:                       dsn,   // data source name
 		DefaultStringSize:         256,   // default size for string fields

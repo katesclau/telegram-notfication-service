@@ -71,9 +71,7 @@ func GetRoutes() *mux.Router {
 		log.Printf("Route: %s", route)
 		if route.IsAuthed {
 			router.HandleFunc(route.Path, authedLt(route.RouteHandler))
-			log.Println("Using authedLt")
 		} else {
-			log.Println("Using lt")
 			router.HandleFunc(route.Path, lt(route.RouteHandler))
 		}
 	}
