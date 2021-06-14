@@ -27,8 +27,8 @@ func WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 		if authHeader[1] != token {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("Unauthorized: Invalid Authentication Header"))
-		} else {
-			next.ServeHTTP(w, r)
+			return
 		}
+		next.ServeHTTP(w, r)
 	})
 }

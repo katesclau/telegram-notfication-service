@@ -25,12 +25,12 @@ func main() {
 		dotenv.GetString("MYSQL_USER"),
 		dotenv.GetString("MYSQL_PASSWORD"),
 	)
-	// Pass along reference to routes - Is there a better way to do this?
-	routes.DB = db
+	// Create a new Routes instance with the DB context - perhaps create a context struct later 😉
+	routes := routes.NewRoutes(db)
 	// We shouldn't run this everytime, only when models change
 	db.AutoMigrate()
 
-	servingErr := http.ListenAndServe(fmt.Sprintf(":%s", dotenv.GetString("PORT")), routes.GetRoutes())
+	servingErr := http.ListenAndServe(fmt.Sprintf(":%s", dotenv.GetString("PORT")), routes.GetRouter())
 	if servingErr != nil {
 		log.Fatal("Failed to init Server: %w", servingErr.Error())
 	}

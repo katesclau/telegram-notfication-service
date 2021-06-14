@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/katesclau/telegramsvc/db"
+	"github.com/profclems/go-dotenv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,6 +28,17 @@ func TestTopics(t *testing.T) {
 	}
 	createdTopic := &db.Topic{}
 
+	// Init DB
+	db := db.GetInstance(
+		"MYSQL",                            // DB Type
+		dotenv.GetString("MYSQL_URL"),      // Endpoint
+		dotenv.GetString("MYSQL_DATABASE"), // Database
+		dotenv.GetString("MYSQL_USER"),
+		dotenv.GetString("MYSQL_PASSWORD"),
+	)
+	routes := NewRoutes(db)
+	router := routes.GetRouter()
+
 	// Test Post Topic
 	t.Run("Create a Topic", func(t *testing.T) {
 		jsonTopic, err := json.Marshal(aTopic)
@@ -35,7 +47,6 @@ func TestTopics(t *testing.T) {
 		}
 		request, _ := http.NewRequest("Post", "/topic", bytes.NewBuffer(jsonTopic))
 		response := httptest.NewRecorder()
-		router := GetRoutes()
 		router.ServeHTTP(response, request)
 		assert.Equal(t, http.StatusAccepted, response.Code, "OK response is expected")
 
@@ -51,7 +62,6 @@ func TestTopics(t *testing.T) {
 	t.Run("Get Created Topic", func(t *testing.T) {
 		request, _ := http.NewRequest("GET", "/topic", nil)
 		response := httptest.NewRecorder()
-		router := GetRoutes()
 		router.ServeHTTP(response, request)
 		assert.Equal(t, 200, response.Code, "OK response is expected")
 	})
@@ -60,7 +70,6 @@ func TestTopics(t *testing.T) {
 	t.Run("Get Created Topic", func(t *testing.T) {
 		request, _ := http.NewRequest("GET", "/topic", nil)
 		response := httptest.NewRecorder()
-		router := GetRoutes()
 		router.ServeHTTP(response, request)
 		assert.Equal(t, 200, response.Code, "OK response is expected")
 	})
@@ -74,7 +83,6 @@ func TestTopics(t *testing.T) {
 		// Assert subscriber info
 		request, _ := http.NewRequest("GET", "/topic", nil)
 		response := httptest.NewRecorder()
-		router := GetRoutes()
 		router.ServeHTTP(response, request)
 		assert.Equal(t, 200, response.Code, "OK response is expected")
 	})

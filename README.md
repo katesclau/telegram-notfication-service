@@ -77,6 +77,7 @@ curl -XGET -H 'Authorization: Bearer <API_TOKEN defined in .env>' -H "Content-ty
 5. https://gorm.io
 6. https://medium.com/rate-engineering/go-test-your-code-an-introduction-to-effective-testing-in-go-6e4f66f2c259
 7. https://github.com/stretchr/testify
+8. https://www.rodrigoaraujo.me/posts/golang-pattern-graceful-shutdown-of-concurrent-events/
 
 ## TODO
 - Routes
@@ -85,3 +86,4 @@ curl -XGET -H 'Authorization: Bearer <API_TOKEN defined in .env>' -H "Content-ty
 - Dockerfile
 - Helm package
 - Docs
+- Safe Shutdown
