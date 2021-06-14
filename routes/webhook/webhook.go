@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"scada-lts.org/telegramsvc/client"
+	"github.com/katesclau/telegramsvc/client"
 )
 
 // HandleMessage receives a Telegram webhook request,

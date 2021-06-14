@@ -5,8 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/routes"
 	"github.com/profclems/go-dotenv"
-	"scada-lts.org/telegramsvc/routes"
 )
 
 func main() {
@@ -15,6 +16,19 @@ func main() {
 	if err := dotenv.LoadConfig(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
+
+	// Init DB
+	db := db.GetInstance(
+		"MYSQL",                            // DB Type
+		dotenv.GetString("MYSQL_URL"),      // Endpoint
+		dotenv.GetString("MYSQL_DATABASE"), // Database
+		dotenv.GetString("MYSQL_USER"),
+		dotenv.GetString("MYSQL_PASSWORD"),
+	)
+	// Pass along reference to routes - Is there a better way to do this?
+	routes.DB = db
+	// We shouldn't run this everytime, only when models change
+	db.AutoMigrate()
 
 	servingErr := http.ListenAndServe(fmt.Sprintf(":%s", dotenv.GetString("PORT")), routes.GetRoutes())
 	if servingErr != nil {

@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"scada-lts.org/telegramsvc/client"
+	"github.com/katesclau/telegramsvc/client"
 )
 
 func TestParseUpdateMessageWithText(t *testing.T) {

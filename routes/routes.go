@@ -5,12 +5,18 @@ import (
 	"log"
 	"net/http"
 
-	"scada-lts.org/telegramsvc/routes/middlewares"
-	"scada-lts.org/telegramsvc/routes/topic"
-	"scada-lts.org/telegramsvc/routes/topic/event"
-	"scada-lts.org/telegramsvc/routes/topic/subscribers"
-	"scada-lts.org/telegramsvc/routes/webhook"
+	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/routes/middlewares"
+	"github.com/katesclau/telegramsvc/routes/topic"
+	"github.com/katesclau/telegramsvc/routes/topic/event"
+	"github.com/katesclau/telegramsvc/routes/topic/subscribers"
+	"github.com/katesclau/telegramsvc/routes/webhook"
+
+	"github.com/gorilla/mux"
 )
+
+// Doing this https://stackoverflow.com/questions/35038864/how-to-access-global-variables seems stupid, do I have a better option?
+var DB *db.DBClient
 
 type Route struct {
 	Path         string
@@ -22,26 +28,31 @@ func (r Route) String() string {
 	return fmt.Sprintf("{ Path: %s,IsAuthed: %t }", r.Path, r.IsAuthed)
 }
 
-func GetRoutes() *http.ServeMux {
+func GetRoutes() *mux.Router {
 	// Dynamic Routes
-	routes := [4]Route{
+	routes := [5]Route{
 		{
 			"/webhook",
 			webhook.HandleMessage,
 			false,
 		},
 		{
-			"/topic",
+			"/topic/",
 			topic.Handler,
 			true,
 		},
 		{
-			"/event",
+			"/topic/{topicName}",
+			topic.Handler,
+			true,
+		},
+		{
+			"/topic/{topicName}/event",
 			event.Handler,
 			true,
 		},
 		{
-			"/subscribers",
+			"/topic/{topicName}/subscribers",
 			subscribers.Handler,
 			true,
 		},
@@ -50,7 +61,7 @@ func GetRoutes() *http.ServeMux {
 	// Authed is not working somehow...
 	authedLt := middlewares.ChainMiddleware(middlewares.WithLogging, middlewares.WithTracing, middlewares.WithAuthentication)
 	lt := middlewares.ChainMiddleware(middlewares.WithLogging, middlewares.WithTracing)
-	router := http.NewServeMux()
+	router := mux.NewRouter()
 
 	// Static content
 	fs := http.FileServer(http.Dir("./routes/static"))

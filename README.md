@@ -2,7 +2,7 @@
 
 This service aims to bridge any issuer to telegram channels by the means of a separate service with an API and a telegram bot implementation.
 
-This service was initially invisioned to work as a notification service for ScadaLTS[scada-lts.org]
+This service was initially invisioned to work as a notification service for ScadaLTS[github.com/katesclau]
 
 ## Getting started
 <!-- TODO: improve  -->
@@ -75,9 +75,8 @@ curl -XPOST -d 'url=<ngrok_endpoint>/webhook' 'https://api.telegram.org/bot<TOKE
 6. https://medium.com/rate-engineering/go-test-your-code-an-introduction-to-effective-testing-in-go-6e4f66f2c259
 
 ## TODO
+- Routes
 - DB Client
-- Authorization
-- Routes, DB Client, Telegram Client tests
 - Test Automation
 - Dockerfile
 - Helm package
