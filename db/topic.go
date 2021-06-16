@@ -39,6 +39,7 @@ func (client *DBClient) GetTopics() []Topic {
 	if results.Error != nil {
 		log.Printf("Failed to retrieve Topics: %s \n", results.Error)
 	}
+	log.Printf("Topics: %v", topics)
 	return topics
 }
 

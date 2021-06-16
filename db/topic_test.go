@@ -112,9 +112,63 @@ func TestTopic(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				got := tt.client.GetTopic(tt.args.name)
-				log.Printf("%+v \n", got)
 				assert.Equal(t, got.Name, tt.want.Name, "Got %s Topic, and expected %s", got.Name, tt.want.Name)
 				assert.Len(t, got.Subscribers, len(tt.want.Subscribers), "Got Topic with %d, and expected %d subscribers", len(got.Subscribers), len(tt.want.Subscribers))
+			})
+		}
+	})
+
+	t.Run("Get topics", func(t *testing.T) {
+		tests := []struct {
+			name   string
+			client *DBClient
+			want   []Topic
+		}{
+			{
+				"Get All Topics",
+				dbclient,
+				[]Topic{aTopicWithoutSubscribers, aTopicWithoutSubscribers},
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				got := tt.client.GetTopics()
+				assert.GreaterOrEqual(t, len(got), len(tt.want), "Received less Topics than expected!")
+			})
+		}
+	})
+
+	t.Run("Delete Topics", func(t *testing.T) {
+		type args struct {
+			name string
+		}
+		tests := []struct {
+			name   string
+			client *DBClient
+			args   args
+			want   *Topic
+		}{
+			{
+				"Delete topic without subscribers",
+				dbclient,
+				args{
+					aTopicWithoutSubscribers.Name,
+				},
+				&aTopicWithoutSubscribers,
+			},
+			{
+				"Delete topic with subscribers",
+				dbclient,
+				args{
+					aTopicWithSubscribers.Name,
+				},
+				&aTopicWithSubscribers,
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				got := tt.client.DeleteTopic(tt.args.name)
+				assert.Equal(t, got.Name, tt.want.Name, "Deleted Topic do not match expected Name!")
 			})
 		}
 	})

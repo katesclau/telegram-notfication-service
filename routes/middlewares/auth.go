@@ -30,6 +30,7 @@ func WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 			w.Write([]byte("Unauthorized: Invalid Authentication Header"))
 			return
 		}
+		log.Printf("AUTH Going fwd...")
 		next.ServeHTTP(w, r)
 	})
 }

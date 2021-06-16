@@ -11,6 +11,7 @@ import (
 	"github.com/katesclau/telegramsvc/routes/topic"
 	"github.com/katesclau/telegramsvc/routes/topic/event"
 	"github.com/katesclau/telegramsvc/routes/topic/subscribers"
+	"github.com/katesclau/telegramsvc/routes/topics"
 	"github.com/katesclau/telegramsvc/routes/webhook"
 
 	"github.com/gorilla/mux"
@@ -35,8 +36,9 @@ func (r *Routes) GetRouter() *mux.Router {
 	fs := http.FileServer(http.Dir("./routes/static"))
 	r.router.Handle("/", fs)
 
-	for _, route := range r.routes {
-		log.Printf("Route: %s", route)
+	for i := 0; i < len(r.routes); i++ {
+		route := r.routes[i]
+		log.Println("Route: ", route)
 		if route.IsAuthed {
 			r.router.HandleFunc(route.Path, authedLt(route.RouteHandler))
 		} else {
@@ -49,22 +51,7 @@ func (r *Routes) GetRouter() *mux.Router {
 func NewRoutes(db *db.DBClient) *Routes {
 	routes := &Routes{}
 	routes.DB = db
-	routes.routes = []Route{ // TODO, create GetRoute(db *db.DBClient) on each endpoint
-		{
-			"/webhook",
-			webhook.GetMethods(db),
-			false,
-		},
-		{
-			"/topic/",
-			topic.GetMethods(db),
-			true,
-		},
-		{
-			"/topic/{topicName}",
-			topic.GetMethods(db),
-			true,
-		},
+	routes.routes = []Route{
 		{
 			"/topic/{topicName}/event",
 			event.GetMethods(db),
@@ -74,6 +61,21 @@ func NewRoutes(db *db.DBClient) *Routes {
 			"/topic/{topicName}/subscribers",
 			subscribers.GetMethods(db),
 			true,
+		},
+		{
+			"/topic/{topicName}",
+			topic.GetMethods(db),
+			true,
+		},
+		{
+			"/topic",
+			topics.GetMethods(db),
+			true,
+		},
+		{
+			"/webhook",
+			webhook.GetMethods(db),
+			false,
 		},
 	}
 	return routes
@@ -90,12 +92,15 @@ func (r Route) String() string {
 }
 
 func (route *Route) RouteHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Route: ", route)
 	// Switch Methods
 	method := strings.ToUpper(r.Method)
+	log.Println("Methods: ", route.Methods)
 	if route.Methods[method] != nil {
 		for k, v := range r.Header {
 			w.Header().Add(k, v[0])
 		}
+		log.Println("Method: ", method, " - ", route.Methods)
 		route.Methods[method](w, r)
 		return
 	}

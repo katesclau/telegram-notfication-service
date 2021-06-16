@@ -22,20 +22,20 @@ func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.
 	methods["GET"] = getHandler
 	methods["POST"] = postHandler
 	methods["DELETE"] = deleteHandler
+	log.Println("Topic Methods: ", methods)
 	return methods
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if single or multiple
+	log.Println("Get Topic: ", r.URL.Path)
 	key := utils.KeyFromPath(r.URL.Path, 2)
-
-	if key != "" {
-		topic := DB.GetTopic(key)
-		utils.BuildResponse(w, r, topic, http.StatusOK)
+	if key == "" {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(http.StatusText(http.StatusNotFound)))
 		return
 	}
-	topics := DB.GetTopics()
-	utils.BuildResponse(w, r, topics, http.StatusOK)
+	topic := DB.GetTopic(key)
+	utils.BuildResponse(w, r, topic, http.StatusOK)
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
