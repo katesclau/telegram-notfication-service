@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"log"
 	"time"
 )
@@ -38,7 +37,7 @@ func (client *DBClient) GetTopics() []Topic {
 	var topics []Topic
 	results := client.db.Find(&topics)
 	if results.Error != nil {
-		fmt.Printf("Failed to retrieve Topics: %s \n", results.Error)
+		log.Printf("Failed to retrieve Topics: %s \n", results.Error)
 	}
 	return topics
 }

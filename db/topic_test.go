@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -113,7 +112,7 @@ func TestTopic(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				got := tt.client.GetTopic(tt.args.name)
-				fmt.Printf("%+v \n", got)
+				log.Printf("%+v \n", got)
 				assert.Equal(t, got.Name, tt.want.Name, "Got %s Topic, and expected %s", got.Name, tt.want.Name)
 				assert.Len(t, got.Subscribers, len(tt.want.Subscribers), "Got Topic with %d, and expected %d subscribers", len(got.Subscribers), len(tt.want.Subscribers))
 			})

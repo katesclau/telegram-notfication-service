@@ -9,7 +9,17 @@ import (
 	"net/http"
 
 	"github.com/katesclau/telegramsvc/client"
+	"github.com/katesclau/telegramsvc/db"
 )
+
+var DB *db.DBClient
+
+func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
+	DB = db
+	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
+	methods["POST"] = HandleMessage
+	return methods
+}
 
 // HandleMessage receives a Telegram webhook request,
 // and responds through Telegram's API (see Package client)

@@ -1,9 +1,10 @@
 package event
 
 import (
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/katesclau/telegramsvc/db"
 )
 
 type Event struct {
@@ -12,19 +13,22 @@ type Event struct {
 	TopicName string
 }
 
-func handlePost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(http.StatusText(http.StatusOK)))
+var DB *db.DBClient
+
+type EventInput struct {
+	Value     string
+	TopicName string
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	// Switch Methods
-	switch r.Method {
-	case "POST":
-		handlePost(w, r)
-	default:
-		log.Println("Method not supported!", r.Method, r.URL.Path)
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
-	}
+func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
+	DB = db
+	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
+	methods["POST"] = postHandler
+	return methods
+}
+
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO, Send message to all subscribers
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(http.StatusText(http.StatusOK)))
 }

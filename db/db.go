@@ -13,7 +13,6 @@ Other supported DBs:
 package db
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -39,7 +38,7 @@ func GetInstance(dbType string, url string, database string, username string, pa
 		lock.Lock()
 		defer lock.Unlock()
 		if dbInstance == nil {
-			fmt.Printf("Creating DB Instance Now %s, %s, %s \n", dbType, url, database)
+			log.Printf("Creating DB Instance Now %s, %s, %s \n", dbType, url, database)
 
 			// Check on https://gorm.io/docs/connecting_to_the_database.html how to support additional DB Engines
 			var err error

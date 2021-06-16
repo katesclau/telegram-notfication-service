@@ -9,6 +9,9 @@ import (
 	"github.com/katesclau/telegramsvc/db"
 	"github.com/katesclau/telegramsvc/routes/middlewares"
 	"github.com/katesclau/telegramsvc/routes/topic"
+	"github.com/katesclau/telegramsvc/routes/topic/event"
+	"github.com/katesclau/telegramsvc/routes/topic/subscribers"
+	"github.com/katesclau/telegramsvc/routes/webhook"
 
 	"github.com/gorilla/mux"
 )
@@ -46,12 +49,12 @@ func (r *Routes) GetRouter() *mux.Router {
 func NewRoutes(db *db.DBClient) *Routes {
 	routes := &Routes{}
 	routes.DB = db
-	routes.routes = []Route{
-		// {
-		// 	"/webhook",
-		// 	webhook.GetMethods(db),
-		// 	false,
-		// },
+	routes.routes = []Route{ // TODO, create GetRoute(db *db.DBClient) on each endpoint
+		{
+			"/webhook",
+			webhook.GetMethods(db),
+			false,
+		},
 		{
 			"/topic/",
 			topic.GetMethods(db),
@@ -62,16 +65,16 @@ func NewRoutes(db *db.DBClient) *Routes {
 			topic.GetMethods(db),
 			true,
 		},
-		// {
-		// 	"/topic/{topicName}/event",
-		// 	event.GetMethods(db),
-		// 	true,
-		// },
-		// {
-		// 	"/topic/{topicName}/subscribers",
-		// 	subscribers.GetMethods(db),
-		// 	true,
-		// },
+		{
+			"/topic/{topicName}/event",
+			event.GetMethods(db),
+			true,
+		},
+		{
+			"/topic/{topicName}/subscribers",
+			subscribers.GetMethods(db),
+			true,
+		},
 	}
 	return routes
 }

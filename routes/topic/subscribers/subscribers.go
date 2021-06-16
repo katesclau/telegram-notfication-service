@@ -1,53 +1,24 @@
 package subscribers
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
-	"strings"
 
 	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/utils"
 )
 
-func getTopicSubscribers(topicName string) ([]db.Subscriber, error) {
-	return nil, nil
+var DB *db.DBClient
+
+func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
+	DB = db
+	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
+	methods["GET"] = getHandler
+	return methods
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	log.Println(path)
-	pathArray := strings.Split(path, "/")
+	key := utils.KeyFromPath(r.URL.Path, 2)
 
-	subscribers, err := getTopicSubscribers(pathArray[1])
-	if err != nil {
-		msg := fmt.Sprintf("Failed to retrieve subscribers. %s", err)
-		fmt.Print(msg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(msg))
-		return
-	}
-
-	jsonBody, marshalingErr := json.Marshal(subscribers)
-	if marshalingErr != nil {
-		msg := fmt.Sprintf("Failed to retrieve subscribers. %s", marshalingErr)
-		fmt.Print(msg)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(msg))
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBody)
-}
-
-func Handler(w http.ResponseWriter, r *http.Request) {
-	// Switch Methods
-	switch r.Method {
-	case "GET":
-		getHandler(w, r)
-	default:
-		log.Println("Method not supported!", r.Method, r.URL.Path)
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
-	}
+	subscribers := DB.GetTopicSubscribers(key)
+	utils.BuildResponse(w, r, subscribers, http.StatusOK)
 }

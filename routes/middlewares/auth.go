@@ -13,6 +13,7 @@ var token = dotenv.GetString("API_TOKEN")
 // TODO: https://hackernoon.com/creating-a-middleware-in-golang-for-jwt-based-authentication-cx3f32z8 when Client Model is implemented
 func WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("=======Auth Middleware=========")
 		authHeader := strings.Split(r.Header.Get("Authorization"), "Bearer ")
 
 		if len(authHeader) != 2 {

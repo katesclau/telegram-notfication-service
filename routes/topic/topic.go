@@ -2,7 +2,6 @@ package topic
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -32,11 +31,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	if key != "" {
 		topic := DB.GetTopic(key)
-		buildResponse(w, r, topic, http.StatusOK)
+		utils.BuildResponse(w, r, topic, http.StatusOK)
 		return
 	}
 	topics := DB.GetTopics()
-	buildResponse(w, r, topics, http.StatusOK)
+	utils.BuildResponse(w, r, topics, http.StatusOK)
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +47,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	topic := DB.CreateTopic(topicInput.Name, []db.Subscriber{})
 	// TODO Link Subscribers...
-	buildResponse(w, r, topic, http.StatusAccepted)
+	utils.BuildResponse(w, r, topic, http.StatusAccepted)
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,25 +56,9 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	if key != "" {
 		topic := DB.DeleteTopic(key)
-		buildResponse(w, r, topic, http.StatusNoContent)
+		utils.BuildResponse(w, r, topic, http.StatusNoContent)
 		return
 	}
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte(http.StatusText(http.StatusNotFound)))
-}
-
-func buildResponse(w http.ResponseWriter, r *http.Request, data interface{}, code int) {
-	body, err := json.Marshal(data)
-	if err != nil {
-		fmt.Printf("Failed to marshal Topic: %+v \n", data)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(code)
-	if _, err := w.Write(body); err != nil {
-		fmt.Printf("Failed to write Response\n")
-	}
 }
