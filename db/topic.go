@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -21,11 +22,19 @@ func (client *DBClient) CreateTopic(name string, subscribers []Subscriber) *Topi
 
 func (client *DBClient) GetTopic(name string) *Topic {
 	var topic *Topic
-	client.db.First(&topic, Topic{Name: name})
+	var subscribers []Subscriber
+	client.db.First(&topic, Topic{Name: name}).Joins("Subscriber")
+	// TODO: Use Joins https://gorm.io/docs/query.html#Joins-Preloading
+	result := client.db.Where(&Subscriber{TopicID: topic.ID}).Find(&subscribers)
+	if result.Error != nil {
+		log.Println("Failed to include subscribers", result.Error)
+		return topic
+	}
+	topic.Subscribers = subscribers
 	return topic
 }
 
-func (client *DBClient) GetTopics(name string) []Topic {
+func (client *DBClient) GetTopics() []Topic {
 	var topics []Topic
 	results := client.db.Find(&topics)
 	if results.Error != nil {

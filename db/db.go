@@ -56,10 +56,10 @@ func GetInstance(dbType string, url string, database string, username string, pa
 			}
 
 		} else {
-			fmt.Println("DB Instance already created-1")
+			log.Println("DB Instance already created-1")
 		}
 	} else {
-		fmt.Println("DB Instance already created-2")
+		log.Println("DB Instance already created-2")
 	}
 	return dbInstance
 }

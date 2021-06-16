@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/utils"
 	"github.com/profclems/go-dotenv"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,6 +20,12 @@ import (
 Testing Topic Routes
 */
 func TestTopics(t *testing.T) {
+	path, _ := os.Getwd()
+	dotenv.SetConfigFile(utils.BuildString(path, "/../.env"))
+	if err := dotenv.LoadConfig(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	var someSubscribers = []db.Subscriber{{
 		Channel: "channel_id",
 		Enabled: true,
@@ -87,4 +96,24 @@ func TestTopics(t *testing.T) {
 		assert.Equal(t, 200, response.Code, "OK response is expected")
 	})
 
+	// Test Events
+	t.Run("Post an Event to a Topic", func(t *testing.T) {
+		// Add a subscriber through DB
+
+		// Get through endpoint
+
+		// Assert subscriber info
+		request, _ := http.NewRequest("POST", utils.BuildString("/topic/", createdTopic.Name, "/event"), nil)
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, request)
+		assert.Equal(t, 200, response.Code, "OK response is expected")
+	})
+
+	// Delete a Topic
+	t.Run("Delete the created Topic", func(t *testing.T) {
+		request, _ := http.NewRequest("DELETE", utils.BuildString("/topic/", createdTopic.Name), nil)
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, request)
+		assert.Equal(t, http.StatusNoContent, response.Code, "OK response is expected")
+	})
 }

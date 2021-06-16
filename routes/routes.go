@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/katesclau/telegramsvc/db"
 	"github.com/katesclau/telegramsvc/routes/middlewares"
 	"github.com/katesclau/telegramsvc/routes/topic"
-	"github.com/katesclau/telegramsvc/routes/topic/event"
-	"github.com/katesclau/telegramsvc/routes/topic/subscribers"
-	"github.com/katesclau/telegramsvc/routes/webhook"
 
 	"github.com/gorilla/mux"
 )
@@ -22,16 +20,6 @@ type Routes struct {
 	routes []Route
 	router *mux.Router
 	DB     *db.DBClient
-}
-
-type Route struct {
-	Path         string
-	RouteHandler func(w http.ResponseWriter, _ *http.Request)
-	IsAuthed     bool
-}
-
-func (r Route) String() string {
-	return fmt.Sprintf("{ Path: %s,IsAuthed: %t }", r.Path, r.IsAuthed)
 }
 
 func (r *Routes) GetRouter() *mux.Router {
@@ -59,31 +47,56 @@ func NewRoutes(db *db.DBClient) *Routes {
 	routes := &Routes{}
 	routes.DB = db
 	routes.routes = []Route{
-		{
-			"/webhook",
-			webhook.HandleMessage,
-			false,
-		},
+		// {
+		// 	"/webhook",
+		// 	webhook.GetMethods(db),
+		// 	false,
+		// },
 		{
 			"/topic/",
-			topic.Handler,
+			topic.GetMethods(db),
 			true,
 		},
 		{
 			"/topic/{topicName}",
-			topic.Handler,
+			topic.GetMethods(db),
 			true,
 		},
-		{
-			"/topic/{topicName}/event",
-			event.Handler,
-			true,
-		},
-		{
-			"/topic/{topicName}/subscribers",
-			subscribers.Handler,
-			true,
-		},
+		// {
+		// 	"/topic/{topicName}/event",
+		// 	event.GetMethods(db),
+		// 	true,
+		// },
+		// {
+		// 	"/topic/{topicName}/subscribers",
+		// 	subscribers.GetMethods(db),
+		// 	true,
+		// },
 	}
 	return routes
+}
+
+type Route struct {
+	Path     string
+	Methods  map[string]func(w http.ResponseWriter, r *http.Request)
+	IsAuthed bool
+}
+
+func (r Route) String() string {
+	return fmt.Sprintf("{ Path: %s,IsAuthed: %t }", r.Path, r.IsAuthed)
+}
+
+func (route *Route) RouteHandler(w http.ResponseWriter, r *http.Request) {
+	// Switch Methods
+	method := strings.ToUpper(r.Method)
+	if route.Methods[method] != nil {
+		for k, v := range r.Header {
+			w.Header().Add(k, v[0])
+		}
+		route.Methods[method](w, r)
+		return
+	}
+	log.Println("Method not supported!", r.Method, r.URL.Path)
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
 }
