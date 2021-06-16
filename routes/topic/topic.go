@@ -35,6 +35,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	topic := DB.GetTopic(key)
+	if topic == nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(http.StatusText(http.StatusNotFound)))
+		return
+	}
 	utils.BuildResponse(w, r, topic, http.StatusOK)
 }
 
