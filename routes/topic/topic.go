@@ -1,58 +1,39 @@
 package topic
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/routes/not_found"
 	"github.com/katesclau/telegramsvc/utils"
 )
 
 var DB *db.DBClient
 
-type TopicInput struct {
-	Name        string
-	Subscribers []string
-}
-
 func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
 	DB = db
 	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
 	methods["GET"] = getHandler
-	methods["POST"] = postHandler
 	methods["DELETE"] = deleteHandler
 	log.Println("Topic Methods: ", methods)
 	return methods
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Topic: ", r.URL.Path)
-	key := utils.KeyFromPath(r.URL.Path, 2)
-	if key == "" {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(http.StatusText(http.StatusNotFound)))
+	topicName := mux.Vars(r)["topicName"]
+	if topicName == "" {
+		topics := DB.GetTopics()
+		utils.BuildResponse(w, r, topics, http.StatusOK)
 		return
 	}
-	topic := DB.GetTopic(key)
+	topic := DB.GetTopic(topicName)
 	if topic == nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(http.StatusText(http.StatusNotFound)))
+		not_found.Handler(w, r)
 		return
 	}
 	utils.BuildResponse(w, r, topic, http.StatusOK)
-}
-
-func postHandler(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var topicInput TopicInput
-	err := decoder.Decode(&topicInput)
-	if err != nil {
-		log.Println("Failed to parse body into Topic Input", err)
-	}
-	topic := DB.CreateTopic(topicInput.Name, []db.Subscriber{})
-	// TODO Link Subscribers...
-	utils.BuildResponse(w, r, topic, http.StatusAccepted)
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +45,5 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		utils.BuildResponse(w, r, topic, http.StatusNoContent)
 		return
 	}
-	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte(http.StatusText(http.StatusNotFound)))
+	not_found.Handler(w, r)
 }

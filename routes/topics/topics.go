@@ -1,6 +1,7 @@
 package topics
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -19,13 +20,24 @@ func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.
 	DB = db
 	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
 	methods["GET"] = getHandler
-	log.Println("Topics Methods: ", methods)
+	methods["POST"] = postHandler
 	return methods
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get Topics: ", r.URL.Path)
 	topics := DB.GetTopics()
-	log.Printf("Topics: %v", topics)
 	utils.BuildResponse(w, r, topics, http.StatusOK)
+}
+
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Topic: ", r.Body)
+	decoder := json.NewDecoder(r.Body)
+	var topicInput TopicInput
+	err := decoder.Decode(&topicInput)
+	if err != nil {
+		log.Println("Failed to parse body into Topic Input", err)
+	}
+	topic := DB.CreateTopic(topicInput.Name, []db.Subscriber{})
+	// TODO Link Subscribers...
+	utils.BuildResponse(w, r, topic, http.StatusAccepted)
 }

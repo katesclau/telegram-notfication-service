@@ -1,36 +1,32 @@
 package routes
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/katesclau/telegramsvc/db"
 	"github.com/katesclau/telegramsvc/routes/middlewares"
+	"github.com/katesclau/telegramsvc/routes/route"
 	"github.com/katesclau/telegramsvc/routes/topic"
 	"github.com/katesclau/telegramsvc/routes/topic/event"
 	"github.com/katesclau/telegramsvc/routes/topic/subscribers"
 	"github.com/katesclau/telegramsvc/routes/topics"
 	"github.com/katesclau/telegramsvc/routes/webhook"
-
-	"github.com/gorilla/mux"
 )
 
-// Doing this https://stackoverflow.com/questions/35038864/how-to-access-global-variables seems stupid, do I have a better option?
 var DB *db.DBClient
 
 type Routes struct {
-	routes []Route
+	routes []route.Route
 	router *mux.Router
-	DB     *db.DBClient
+	db     *db.DBClient
 }
 
 func (r *Routes) GetRouter() *mux.Router {
 	// Authed is not working somehow...
 	authedLt := middlewares.ChainMiddleware(middlewares.WithLogging, middlewares.WithTracing, middlewares.WithAuthentication)
 	lt := middlewares.ChainMiddleware(middlewares.WithLogging, middlewares.WithTracing)
-	r.router = mux.NewRouter()
 
 	// Static content
 	fs := http.FileServer(http.Dir("./routes/static"))
@@ -50,61 +46,42 @@ func (r *Routes) GetRouter() *mux.Router {
 
 func NewRoutes(db *db.DBClient) *Routes {
 	routes := &Routes{}
-	routes.DB = db
-	routes.routes = []Route{
+	routes.db = db
+
+	// Routes
+	routes.routes = []route.Route{
 		{
-			"/topic/{topicName}/event",
-			event.GetMethods(db),
-			true,
+			Path:     "/topic/{topicName}/event",
+			Methods:  event.GetMethods(db),
+			IsAuthed: true,
 		},
 		{
-			"/topic/{topicName}/subscribers",
-			subscribers.GetMethods(db),
-			true,
+			Path:     "/topic/{topicName}/subscribers",
+			Methods:  subscribers.GetMethods(db),
+			IsAuthed: true,
 		},
 		{
-			"/topic/{topicName}",
-			topic.GetMethods(db),
-			true,
+			Path:     "/topic/{topicName}",
+			Methods:  topic.GetMethods(db),
+			IsAuthed: true,
 		},
 		{
-			"/topic",
-			topics.GetMethods(db),
-			true,
+			Path:     "/topic/", // TODO Support for multiple paths ('/topic', 'topics', '/topic/')
+			Methods:  topics.GetMethods(db),
+			IsAuthed: true,
 		},
 		{
-			"/webhook",
-			webhook.GetMethods(db),
-			false,
+			Path:     "/webhook",
+			Methods:  webhook.GetMethods(db),
+			IsAuthed: false,
 		},
 	}
+
+	// Gorilla Mux Router
+	router := mux.NewRouter()
+	// Use CORS
+	router.Use(mux.CORSMethodMiddleware(router))
+	routes.router = router
+
 	return routes
-}
-
-type Route struct {
-	Path     string
-	Methods  map[string]func(w http.ResponseWriter, r *http.Request)
-	IsAuthed bool
-}
-
-func (r Route) String() string {
-	return fmt.Sprintf("{ Path: %s,IsAuthed: %t }", r.Path, r.IsAuthed)
-}
-
-func (route *Route) RouteHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Route: ", route)
-	// Switch Methods
-	method := strings.ToUpper(r.Method)
-	log.Println("Methods: ", route.Methods)
-	if route.Methods[method] != nil {
-		for k, v := range r.Header {
-			w.Header().Add(k, v[0])
-		}
-		log.Println("Method: ", method, " - ", route.Methods)
-		route.Methods[method](w, r)
-		return
-	}
-	log.Println("Method not supported!", r.Method, r.URL.Path)
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
 }
