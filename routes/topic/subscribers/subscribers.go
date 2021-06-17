@@ -3,6 +3,7 @@ package subscribers
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/katesclau/telegramsvc/db"
 	"github.com/katesclau/telegramsvc/utils"
 )
@@ -17,8 +18,8 @@ func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
-	key := utils.KeyFromPath(r.URL.Path, 2)
+	topicName := mux.Vars(r)["topicName"]
 
-	subscribers := DB.GetTopicSubscribers(key)
+	subscribers := DB.GetTopicSubscribers(topicName)
 	utils.BuildResponse(w, r, subscribers, http.StatusOK)
 }
