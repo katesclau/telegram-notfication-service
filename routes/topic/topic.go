@@ -40,8 +40,8 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	topicName := mux.Vars(r)["topicName"]
 
 	if topicName != "" {
-		topic := DB.DeleteTopic(topicName)
-		utils.BuildResponse(w, r, topic, http.StatusNoContent)
+		DB.DeleteTopic(topicName)
+		utils.BuildResponse(w, r, nil, http.StatusNoContent)
 		return
 	}
 	not_found.Handler(w, r)

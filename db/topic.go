@@ -2,19 +2,29 @@ package db
 
 import (
 	"log"
-	"time"
+
+	"gorm.io/gorm"
 )
 
 type Topic struct {
-	ID          uint `gorm:"primaryKey"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	gorm.Model
 	Name        string `gorm:"not null:unique"`
 	Subscribers []Subscriber
 }
 type TopicInput struct {
 	Name        string
 	Subscribers []SubscriberInput
+}
+
+func (topic *Topic) BeforeDelete(tx *gorm.DB) (err error) {
+	var subscribers = []Subscriber{}
+	results := tx.Where(&Subscriber{TopicID: topic.ID}).Find(&subscribers)
+	if results.Error != nil {
+		log.Printf("Failed to delete Topic: %s \n", results.Error)
+	}
+
+	tx.Delete(&subscribers)
+	return
 }
 
 func (client *DBClient) CreateTopic(name string, subscribers []SubscriberInput) *Topic {

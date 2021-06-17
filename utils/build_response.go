@@ -7,6 +7,11 @@ import (
 )
 
 func BuildResponse(w http.ResponseWriter, r *http.Request, data interface{}, code int) {
+	if data == nil {
+		w.WriteHeader(code)
+		return
+	}
+
 	body, err := json.Marshal(data)
 	if err != nil {
 		log.Printf("Failed to marshal Topic: %+v \n", data)

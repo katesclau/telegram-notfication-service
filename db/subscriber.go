@@ -2,16 +2,16 @@ package db
 
 import (
 	"log"
-	"time"
+
+	"gorm.io/gorm"
 )
 
 type Subscriber struct {
-	ID        uint `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Channel   string `gorm:"not null"`
-	Enabled   bool   `gorm:"default:true"`
-	TopicID   uint
+	gorm.Model
+	Channel string `gorm:"not null"`
+	Enabled bool   `gorm:"default:true"`
+	TopicID uint
+	Topic   Topic
 }
 
 type SubscriberInput struct {
