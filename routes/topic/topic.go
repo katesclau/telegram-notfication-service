@@ -37,11 +37,10 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if single or multiple
-	key := utils.KeyFromPath(r.URL.Path, 2)
+	topicName := mux.Vars(r)["topicName"]
 
-	if key != "" {
-		topic := DB.DeleteTopic(key)
+	if topicName != "" {
+		topic := DB.DeleteTopic(topicName)
 		utils.BuildResponse(w, r, topic, http.StatusNoContent)
 		return
 	}
