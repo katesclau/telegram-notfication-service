@@ -3,6 +3,7 @@ package db
 import (
 	"strings"
 
+	"github.com/profclems/go-dotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -30,5 +31,7 @@ func NewMYSQLDB(url string, database string, username string, password string) (
 		DontSupportRenameIndex:    true,  // drop & create when rename index, rename index not supported before MySQL 5.7, MariaDB
 		DontSupportRenameColumn:   true,  // `change` when rename column, rename column not supported before MySQL 8, MariaDB
 		SkipInitializeWithVersion: false, // auto configure based on currently MySQL version
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		CreateBatchSize: dotenv.GetInt("DB_BATCH_SIZE"),
+	})
 }

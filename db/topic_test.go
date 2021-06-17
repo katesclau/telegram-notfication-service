@@ -19,10 +19,10 @@ func TestTopic(t *testing.T) {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	var someSubscribers = []Subscriber{{
-		Channel: "channel_id",
-		Enabled: true,
-	}}
+	var aSubscriber = SubscriberInput{
+		Channel: gofakeit.LoremIpsumWord(),
+	}
+	var someSubscribers = []SubscriberInput{aSubscriber}
 
 	var aTopicWithoutSubscribers = Topic{
 		Name:        gofakeit.LoremIpsumWord(),
@@ -30,7 +30,7 @@ func TestTopic(t *testing.T) {
 	}
 	var aTopicWithSubscribers = Topic{
 		Name:        gofakeit.LoremIpsumWord(),
-		Subscribers: someSubscribers,
+		Subscribers: []Subscriber{{Channel: aSubscriber.Channel}},
 	}
 	// createdTopic := &Topic{}
 
@@ -46,7 +46,7 @@ func TestTopic(t *testing.T) {
 	t.Run("Create a Topic", func(t *testing.T) {
 		type args struct {
 			name        string
-			subscribers []Subscriber
+			subscribers []SubscriberInput
 		}
 		tests := []struct {
 			name   string
@@ -59,7 +59,7 @@ func TestTopic(t *testing.T) {
 				dbclient,
 				args{
 					aTopicWithoutSubscribers.Name,
-					[]Subscriber{},
+					[]SubscriberInput{},
 				},
 				&aTopicWithoutSubscribers,
 			},

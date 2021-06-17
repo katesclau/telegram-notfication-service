@@ -20,6 +20,6 @@ func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.
 func getHandler(w http.ResponseWriter, r *http.Request) {
 	topicName := mux.Vars(r)["topicName"]
 
-	subscribers := DB.GetTopicSubscribers(topicName)
+	subscribers := DB.GetTopic(topicName).Subscribers
 	utils.BuildResponse(w, r, subscribers, http.StatusOK)
 }

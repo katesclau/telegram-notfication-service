@@ -11,11 +11,6 @@ import (
 
 var DB *db.DBClient
 
-type TopicInput struct {
-	Name        string
-	Subscribers []string
-}
-
 func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
 	DB = db
 	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
@@ -30,14 +25,14 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Topic: ", r.Body)
 	decoder := json.NewDecoder(r.Body)
-	var topicInput TopicInput
+	var topicInput db.TopicInput
 	err := decoder.Decode(&topicInput)
 	if err != nil {
 		log.Println("Failed to parse body into Topic Input", err)
 	}
-	topic := DB.CreateTopic(topicInput.Name, []db.Subscriber{})
+	log.Println("Topic: ", topicInput)
+	topic := DB.CreateTopic(topicInput.Name, topicInput.Subscribers)
 	// TODO Link Subscribers...
 	utils.BuildResponse(w, r, topic, http.StatusAccepted)
 }

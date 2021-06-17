@@ -17,7 +17,7 @@ func BuildResponse(w http.ResponseWriter, r *http.Request, data interface{}, cod
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
-	if _, err := w.Write(body); err != nil {
-		log.Printf("Failed to write Response\n")
+	if _, err := w.Write([]byte(body)); err != nil {
+		log.Println("Failed to write Response", err)
 	}
 }
