@@ -17,6 +17,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/profclems/go-dotenv"
 	"gorm.io/gorm"
 )
 
@@ -45,7 +46,10 @@ func GetInstance(dbType string, url string, database string, username string, pa
 			var db *gorm.DB
 			switch strings.ToUpper(dbType) {
 			case "MYSQL":
-				db, err = NewMYSQLDB(url, database, username, password)
+				db, err = NewMYSQLDB(url, database, username, password, &gorm.Config{
+					CreateBatchSize: dotenv.GetInt("DB_BATCH_SIZE"),
+					PrepareStmt:     true,
+				})
 				if err != nil {
 					log.Fatalf("Failed to connect to DB %s", err)
 				}

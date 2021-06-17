@@ -3,7 +3,6 @@ package db
 import (
 	"strings"
 
-	"github.com/profclems/go-dotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -22,7 +21,7 @@ func buildMysqlDSUrl(url string, database string, username string, password stri
 	return builder.String()
 }
 
-func NewMYSQLDB(url string, database string, username string, password string) (*gorm.DB, error) {
+func NewMYSQLDB(url string, database string, username string, password string, config *gorm.Config) (*gorm.DB, error) {
 	dsn := buildMysqlDSUrl(url, database, username, password)
 	return gorm.Open(mysql.New(mysql.Config{
 		DSN:                       dsn,   // data source name
@@ -31,7 +30,5 @@ func NewMYSQLDB(url string, database string, username string, password string) (
 		DontSupportRenameIndex:    true,  // drop & create when rename index, rename index not supported before MySQL 5.7, MariaDB
 		DontSupportRenameColumn:   true,  // `change` when rename column, rename column not supported before MySQL 8, MariaDB
 		SkipInitializeWithVersion: false, // auto configure based on currently MySQL version
-	}), &gorm.Config{
-		CreateBatchSize: dotenv.GetInt("DB_BATCH_SIZE"),
-	})
+	}), config)
 }

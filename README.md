@@ -80,10 +80,8 @@ curl -XGET -H 'Authorization: Bearer <API_TOKEN defined in .env>' -H "Content-ty
 8. https://www.rodrigoaraujo.me/posts/golang-pattern-graceful-shutdown-of-concurrent-events/
 
 ## TODO
-- Routes
-- DB Client
-- Test Automation
+- Telegram commands
+- Safe Shutdown
 - Dockerfile
 - Helm package
 - Docs
-- Safe Shutdown
