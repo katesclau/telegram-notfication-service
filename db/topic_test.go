@@ -75,9 +75,11 @@ func TestTopic(t *testing.T) {
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
+				log.Println("Running: ", tt.name)
 				got := tt.client.CreateTopic(tt.args.name, tt.args.subscribers)
 				assert.Equal(t, got.Name, tt.want.Name, "Created %s Topic, and expected %s", got.Name, tt.want.Name)
 				assert.Len(t, got.Subscribers, len(tt.want.Subscribers), "Created Topic with %d, and expected %d subscribers", len(got.Subscribers), len(tt.want.Subscribers))
+				log.Println(tt.name, " Done!")
 			})
 		}
 	})
@@ -119,12 +121,16 @@ func TestTopic(t *testing.T) {
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
+				log.Println("Running: ", tt.name)
 				got := tt.client.GetTopic(tt.args.name)
 				if tt.want == nil {
 					assert.Nilf(t, got, "Got something, when expecting nil %v", got)
+				} else {
+					assert.NotNil(t, got, "Expected not nil!")
+					assert.Equal(t, got.Name, tt.want.Name, "Got %s Topic, and expected %s", got.Name, tt.want.Name)
+					assert.Len(t, got.Subscribers, len(tt.want.Subscribers), "Got Topic with %d, and expected %d subscribers", len(got.Subscribers), len(tt.want.Subscribers))
 				}
-				assert.Equal(t, got.Name, tt.want.Name, "Got %s Topic, and expected %s", got.Name, tt.want.Name)
-				assert.Len(t, got.Subscribers, len(tt.want.Subscribers), "Got Topic with %d, and expected %d subscribers", len(got.Subscribers), len(tt.want.Subscribers))
+				log.Println(tt.name, " Done!")
 			})
 		}
 	})
@@ -143,8 +149,10 @@ func TestTopic(t *testing.T) {
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
+				log.Println("Running: ", tt.name)
 				got := tt.client.GetTopics()
 				assert.GreaterOrEqual(t, len(got), len(tt.want), "Received less Topics than expected!")
+				log.Println(tt.name, " Done!")
 			})
 		}
 	})
@@ -157,7 +165,6 @@ func TestTopic(t *testing.T) {
 			name   string
 			client *DBClient
 			args   args
-			want   *Topic
 		}{
 			{
 				"Delete topic without subscribers",
@@ -165,7 +172,6 @@ func TestTopic(t *testing.T) {
 				args{
 					aTopicWithoutSubscribers.Name,
 				},
-				&aTopicWithoutSubscribers,
 			},
 			{
 				"Delete topic with subscribers",
@@ -173,13 +179,16 @@ func TestTopic(t *testing.T) {
 				args{
 					aTopicWithSubscribers.Name,
 				},
-				&aTopicWithSubscribers,
 			},
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
-				got := tt.client.DeleteTopic(tt.args.name)
-				assert.Equal(t, got.Name, tt.want.Name, "Deleted Topic do not match expected Name!")
+				log.Println("Running: ", tt.name)
+				tt.client.DeleteTopic(tt.args.name)
+				got := tt.client.GetTopic(tt.args.name)
+				log.Println(got)
+				assert.Nil(t, got, "Deleted Topic found still!")
+				log.Println(tt.name, " Done!")
 			})
 		}
 	})

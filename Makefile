@@ -4,7 +4,7 @@ services:
 	docker-compose --env-file .env up -d
 
 test: services
-	go test ./...
+	go test ./... -cover
 
 build: clean
 	go build main.go

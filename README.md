@@ -81,6 +81,7 @@ curl -XGET -H 'Authorization: Bearer <API_TOKEN defined in .env>' -H "Content-ty
 
 ## TODO
 - Telegram commands
+- Test Routes
 - Safe Shutdown
 - Dockerfile
 - Helm package

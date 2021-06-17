@@ -22,12 +22,16 @@ func (client *DBClient) GetTopicSubscribers(topicID uint) []Subscriber {
 	subscribers := []Subscriber{}
 	results := client.db.Select("ID", "Channel", "Enabled", "TopicID", "CreatedAt", "UpdatedAt").Where(&Subscriber{TopicID: topicID}).Find(&subscribers)
 	if results.Error != nil {
-		log.Printf("Failed to retrieve Topics: %s \n", results.Error)
+		// log.Printf("Failed to subscribers for Topic: %s \n", topicID, results.Error)
 	}
 	return subscribers
 }
 
 func (client *DBClient) AddTopicSubscribers(topic Topic, input []SubscriberInput) {
+	if len(input) == 0 {
+		return
+	}
+
 	subscribers := []Subscriber{}
 	for _, subscriber := range input {
 		subscribers = append(subscribers, Subscriber{
