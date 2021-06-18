@@ -1,34 +1,31 @@
 package topic
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/katesclau/telegramsvc/db"
 	"github.com/katesclau/telegramsvc/routes/not_found"
+	"github.com/katesclau/telegramsvc/routes/route"
 	"github.com/katesclau/telegramsvc/utils"
 )
 
-var DB *db.DBClient
-
-func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
-	DB = db
-	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
-	methods["GET"] = getHandler
-	methods["DELETE"] = deleteHandler
-	log.Println("Topic Methods: ", methods)
-	return methods
+func GetRoute(ctx *route.Context) route.Route {
+	r := route.NewRoute(ctx, "/topic/{topicName}", true)
+	methodHandlers := make(map[string]func(ctx *route.Context, w http.ResponseWriter, r *http.Request))
+	methodHandlers["GET"] = getHandler
+	methodHandlers["DELETE"] = deleteHandler
+	r.SetMethodHandlers(methodHandlers)
+	return *r
 }
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
+func getHandler(ctx *route.Context, w http.ResponseWriter, r *http.Request) {
 	topicName := mux.Vars(r)["topicName"]
 	if topicName == "" {
-		topics := DB.GetTopics()
+		topics := ctx.DB.GetTopics()
 		utils.BuildResponse(w, r, topics, http.StatusOK)
 		return
 	}
-	topic := DB.GetTopic(topicName)
+	topic := ctx.DB.GetTopic(topicName)
 	if topic == nil {
 		not_found.Handler(w, r)
 		return
@@ -36,11 +33,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	utils.BuildResponse(w, r, topic, http.StatusOK)
 }
 
-func deleteHandler(w http.ResponseWriter, r *http.Request) {
+func deleteHandler(ctx *route.Context, w http.ResponseWriter, r *http.Request) {
 	topicName := mux.Vars(r)["topicName"]
 
 	if topicName != "" {
-		DB.DeleteTopic(topicName)
+		ctx.DB.DeleteTopic(topicName)
 		utils.BuildResponse(w, r, nil, http.StatusNoContent)
 		return
 	}

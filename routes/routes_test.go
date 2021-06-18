@@ -8,9 +8,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/routes/route"
+	"github.com/katesclau/telegramsvc/telegram"
 	"github.com/katesclau/telegramsvc/utils"
 	"github.com/profclems/go-dotenv"
 	"github.com/stretchr/testify/assert"
@@ -37,6 +40,9 @@ func TestTopics(t *testing.T) {
 	}
 	createdTopic := &db.Topic{}
 
+	// Sync group for gracefully shutdown
+	wg := &sync.WaitGroup{}
+
 	// Init DB
 	db := db.GetInstance(
 		"MYSQL",                            // DB Type
@@ -45,7 +51,14 @@ func TestTopics(t *testing.T) {
 		dotenv.GetString("MYSQL_USER"),
 		dotenv.GetString("MYSQL_PASSWORD"),
 	)
-	routes := NewRoutes(db)
+
+	ctx := &route.Context{
+		DB:             db,
+		WG:             wg,
+		TelegramClient: telegram.TelegramClient,
+	}
+
+	routes := NewRoutes(ctx)
 	router := routes.GetRouter()
 
 	// Test Post Topic

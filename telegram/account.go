@@ -1,4 +1,4 @@
-package client
+package telegram
 
 // A Telegram Account holds the user information.
 type Account struct {

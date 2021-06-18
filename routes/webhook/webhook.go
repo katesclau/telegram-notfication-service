@@ -8,22 +8,21 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/katesclau/telegramsvc/client"
-	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/routes/route"
+	"github.com/katesclau/telegramsvc/telegram"
 )
 
-var DB *db.DBClient
-
-func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
-	DB = db
-	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
-	methods["POST"] = HandleMessage
-	return methods
+func GetRoute(ctx *route.Context) route.Route {
+	r := route.NewRoute(ctx, "/webhook", false)
+	methodHandlers := make(map[string]func(ctx *route.Context, w http.ResponseWriter, r *http.Request))
+	methodHandlers["POST"] = postHandler
+	r.SetMethodHandlers(methodHandlers)
+	return *r
 }
 
-// HandleMessage receives a Telegram webhook request,
-// and responds through Telegram's API (see Package client)
-func HandleMessage(w http.ResponseWriter, r *http.Request) {
+// Receives a Telegram webhook request,
+// and responds through Telegram's API (see package telegram)
+func postHandler(ctx *route.Context, w http.ResponseWriter, r *http.Request) {
 	// Parse
 	var update, err = parseTelegramRequest(r)
 	if err != nil {
@@ -31,17 +30,21 @@ func HandleMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Sanitize input
-	// var sanitizedSeed = sanitize(update.Message.Text)
+	ctx.WG.Add(1)
+	go func() {
+		defer ctx.WG.Done()
+		// Sanitize input
+		// var sanitizedSeed = sanitize(update.Message.Text)
 
-	// Send the punchline back to Telegram
-	client.TelegramClient.SendMessage(update.Message.Chat.Id, "Some data")
+		// Send the punchline back to Telegram
+		telegram.TelegramClient.SendMessage(update.Message.Chat.Id, "Some data")
+	}()
 }
 
 // parseTelegramRequest deserializes the JSON received in the request body
 // from Telegram webhook request
-func parseTelegramRequest(r *http.Request) (*client.Update, error) {
-	var update client.Update
+func parseTelegramRequest(r *http.Request) (*telegram.Update, error) {
+	var update telegram.Update
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		log.Printf("could not decode incoming update %s", err.Error())
 		return nil, err

@@ -6,25 +6,25 @@ import (
 	"net/http"
 
 	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/routes/route"
 	"github.com/katesclau/telegramsvc/utils"
 )
 
-var DB *db.DBClient
-
-func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
-	DB = db
-	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
-	methods["GET"] = getHandler
-	methods["POST"] = postHandler
-	return methods
+func GetRoute(ctx *route.Context) route.Route {
+	r := route.NewRoute(ctx, "/topic/", true)
+	methodHandlers := make(map[string]func(ctx *route.Context, w http.ResponseWriter, r *http.Request))
+	methodHandlers["GET"] = getHandler
+	methodHandlers["POST"] = postHandler
+	r.SetMethodHandlers(methodHandlers)
+	return *r
 }
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
-	topics := DB.GetTopics()
+func getHandler(ctx *route.Context, w http.ResponseWriter, r *http.Request) {
+	topics := ctx.DB.GetTopics()
 	utils.BuildResponse(w, r, topics, http.StatusOK)
 }
 
-func postHandler(w http.ResponseWriter, r *http.Request) {
+func postHandler(ctx *route.Context, w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var topicInput db.TopicInput
 	err := decoder.Decode(&topicInput)
@@ -32,7 +32,6 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to parse body into Topic Input", err)
 	}
 	log.Println("Topic: ", topicInput)
-	topic := DB.CreateTopic(topicInput.Name, topicInput.Subscribers)
-	// TODO Link Subscribers...
+	topic := ctx.DB.CreateTopic(topicInput.Name, topicInput.Subscribers)
 	utils.BuildResponse(w, r, topic, http.StatusAccepted)
 }

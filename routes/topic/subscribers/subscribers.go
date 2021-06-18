@@ -4,22 +4,21 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/katesclau/telegramsvc/db"
+	"github.com/katesclau/telegramsvc/routes/route"
 	"github.com/katesclau/telegramsvc/utils"
 )
 
-var DB *db.DBClient
-
-func GetMethods(db *db.DBClient) map[string]func(w http.ResponseWriter, r *http.Request) {
-	DB = db
-	methods := make(map[string]func(w http.ResponseWriter, r *http.Request))
-	methods["GET"] = getHandler
-	return methods
+func GetRoute(ctx *route.Context) route.Route {
+	r := route.NewRoute(ctx, "/topic/{topicName}/subscribers", true)
+	methodHandlers := make(map[string]func(ctx *route.Context, w http.ResponseWriter, r *http.Request))
+	methodHandlers["GET"] = getHandler
+	r.SetMethodHandlers(methodHandlers)
+	return *r
 }
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
+func getHandler(ctx *route.Context, w http.ResponseWriter, r *http.Request) {
 	topicName := mux.Vars(r)["topicName"]
 
-	subscribers := DB.GetTopic(topicName).Subscribers
+	subscribers := ctx.DB.GetTopic(topicName).Subscribers
 	utils.BuildResponse(w, r, subscribers, http.StatusOK)
 }

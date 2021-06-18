@@ -1,4 +1,4 @@
-package client
+package telegram
 
 type File struct {
 	ID      string `json:"file_id"`

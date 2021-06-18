@@ -1,4 +1,4 @@
-package client
+package telegram
 
 import (
 	"encoding/base64"
@@ -14,6 +14,7 @@ import (
 	"github.com/profclems/go-dotenv"
 )
 
+// TODO: Make this singleton
 var TelegramClient *Client = NewClient(dotenv.GetString("TELEGRAM_TOKEN"))
 var BaseURL string = "https://api.telegram.org"
 

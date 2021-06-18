@@ -18,9 +18,9 @@ import (
 var DB *db.DBClient
 
 type Routes struct {
-	routes []route.Route
-	router *mux.Router
-	db     *db.DBClient
+	routes  []route.Route
+	router  *mux.Router
+	context *route.Context
 }
 
 func (r *Routes) GetRouter() *mux.Router {
@@ -44,37 +44,17 @@ func (r *Routes) GetRouter() *mux.Router {
 	return r.router
 }
 
-func NewRoutes(db *db.DBClient) *Routes {
+func NewRoutes(ctx *route.Context) *Routes {
 	routes := &Routes{}
-	routes.db = db
+	routes.context = ctx
 
 	// Routes
 	routes.routes = []route.Route{
-		{
-			Path:     "/topic/{topicName}/event",
-			Methods:  event.GetMethods(db),
-			IsAuthed: true,
-		},
-		{
-			Path:     "/topic/{topicName}/subscribers",
-			Methods:  subscribers.GetMethods(db),
-			IsAuthed: true,
-		},
-		{
-			Path:     "/topic/{topicName}",
-			Methods:  topic.GetMethods(db),
-			IsAuthed: true,
-		},
-		{
-			Path:     "/topic/", // TODO Support for multiple paths ('/topic', 'topics', '/topic/')
-			Methods:  topics.GetMethods(db),
-			IsAuthed: true,
-		},
-		{
-			Path:     "/webhook",
-			Methods:  webhook.GetMethods(db),
-			IsAuthed: false,
-		},
+		event.GetRoute(ctx),
+		subscribers.GetRoute(ctx),
+		topic.GetRoute(ctx),
+		topics.GetRoute(ctx),
+		webhook.GetRoute(ctx),
 	}
 
 	// Gorilla Mux Router
