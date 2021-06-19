@@ -22,3 +22,21 @@ clean:
 
 docs:
 	go doc --all 
+
+docker-build: gen-version
+	# Build the docker image
+	docker build -t telegramsvc .
+
+	# Tag the image
+	docker tag telegramsvc katesclau/telegramsvc:${VERSION}
+
+docker-push: docker-build
+	# Push the image to docker hub
+	docker push katesclau/telegramsvc:${VERSION}
+
+local-deploy:
+	minikube start
+	kubectl apply -f ./infra/deployment.yml
+
+gen-version:
+	VERSION=$(shell cat version)

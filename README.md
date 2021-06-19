@@ -78,11 +78,10 @@ curl -XGET -H 'Authorization: Bearer <API_TOKEN defined in .env>' -H "Content-ty
 6. https://medium.com/rate-engineering/go-test-your-code-an-introduction-to-effective-testing-in-go-6e4f66f2c259
 7. https://github.com/stretchr/testify
 8. https://www.rodrigoaraujo.me/posts/golang-pattern-graceful-shutdown-of-concurrent-events/
+9. https://www.callicoder.com/deploy-containerized-go-app-kubernetes/
 
 ## TODO
 - Telegram commands
 - Test Routes
-- Safe Shutdown
-- Dockerfile
 - Helm package
 - Docs

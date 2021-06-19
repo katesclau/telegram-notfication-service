@@ -1,3 +1,4 @@
+// Telegram Service is a notification service that allows bot owners to issue notifications to subscribers in Telegram Channels
 package main
 
 import (
@@ -9,6 +10,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/katesclau/telegramsvc/db"
 	"github.com/katesclau/telegramsvc/routes"
@@ -57,14 +59,22 @@ func main() {
 		log.Fatal("Failed to init Server: %w", servingErr.Error())
 	}
 
-	// Handle sigterm and await termChan signal
-	termChan := make(chan os.Signal)
-	signal.Notify(termChan, syscall.SIGTERM, syscall.SIGINT)
+	waitForShutdown(httpServer, wg)
+}
 
+func waitForShutdown(srv *http.Server, wg *sync.WaitGroup) {
+	// Handle sigterm and await termChan signal
+	interruptChan := make(chan os.Signal, 1)
+	signal.Notify(interruptChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	// Block until we receive our signal.
 	go func() {
-		<-termChan // Blocks here until interrupted
+		<-interruptChan
 		log.Print("SIGTERM received. Shutdown process initiated\n")
-		httpServer.Shutdown(context.Background())
+		// Create a deadline to wait for.
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		srv.Shutdown(ctx)
 	}()
 
 	// This is where, once we're closing the program, we wait for all
@@ -72,6 +82,5 @@ func main() {
 	log.Println("waiting for running jobs to finish")
 	wg.Wait()
 	log.Println("jobs finished. exiting")
+	os.Exit(0)
 }
-
-//
